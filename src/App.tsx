@@ -1,48 +1,67 @@
 import { useAuthenticator } from '@aws-amplify/ui-react';
-import { useEffect, useState } from "react";
-import type { Schema } from "../amplify/data/resource";
-import { generateClient } from "aws-amplify/data";
-
-const client = generateClient<Schema>();
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { AppBar, Toolbar, Button, Container, Typography } from '@mui/material';
+import PhotoShow from './components/PhotoShow';
 
 function App() {
   const { signOut } = useAuthenticator();
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
-
-  useEffect(() => {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
-  }, []);
-
-  function createTodo() {
-    client.models.Todo.create({ content: window.prompt("Todo content") });
-  }
-
-  function deleteTodo(id: string) {
-    client.models.Todo.delete({ id })
-  }
 
   return (
-    <main>
-      <h1>My todos</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map(todo => <li
-          onClick={() => deleteTodo(todo.id)}
-          key={todo.id}>
-          {todo.content}
-        </li>)}
-      </ul>
-      <div>
-        🥳 App successfully hosted. Try creating a new todo.
-        <br />
-        <a href="https://docs.amplify.aws/react/start/quickstart/#make-frontend-updates">
-          Review next step of this tutorial.
-        </a>
-      </div>
-            <button onClick={signOut}>Sign out</button>
-    </main>
+    <Router>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" component={Link} to="/" sx={{ 
+            textDecoration: 'none', 
+            color: 'inherit',
+            marginRight: '2rem' 
+          }}>
+            Photo Editor App
+          </Typography>
+          <Button color="inherit" component={Link} to="/" sx={{ mr: 2 }}>
+            Home
+          </Button>
+          <Button color="inherit" component={Link} to="/photo" sx={{ mr: 2 }}>
+            Photo Editor
+          </Button>
+          <div style={{ flexGrow: 1 }} />
+          <Button color="inherit" onClick={signOut}>
+            Sign out
+          </Button>
+        </Toolbar>
+      </AppBar>
+
+      <Container maxWidth="md" sx={{ mt: 4 }}>
+        <Routes>
+          <Route path="/" element={
+            <div>
+              <Typography variant="h3" gutterBottom sx={{ 
+                fontWeight: 'bold',
+                mb: 4
+              }}>
+                Welcome to Photo Editor App
+              </Typography>
+              <Typography variant="h6" sx={{ 
+                color: 'text.secondary',
+                mb: 3,
+                maxWidth: '600px'
+              }}>
+                A powerful tool for editing and enhancing your photos with professional features.
+              </Typography>
+              <Button 
+                variant="contained" 
+                component={Link} 
+                to="/photo" 
+                size="large"
+                sx={{ mt: 2 }}
+              >
+                Start Editing
+              </Button>
+            </div>
+          } />
+          <Route path="/photo" element={<PhotoShow />} />
+        </Routes>
+      </Container>
+    </Router>
   );
 }
 
